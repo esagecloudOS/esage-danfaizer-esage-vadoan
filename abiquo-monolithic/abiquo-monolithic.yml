@@ -1,0 +1,11 @@
+---
+# This playbook deploys an Abiquo 3.0 Monolithic 7 server. 
+
+- hosts: abiquotesting
+  user: root
+
+  roles:
+    - selinux
+    - repository
+    - commons
+    - abiquo

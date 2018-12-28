@@ -1,0 +1,56 @@
+  - name: Install Abiquo packages
+    yum: name={{ item }} state=present
+    with_items:
+      - abiquo-core
+      - abiquo-api
+      - abiquo-am
+      - abiquo-cpp
+      - abiquo-m
+      - abiquo-nodecollector
+      - abiquo-remote-services
+      - abiquo-server
+      - abiquo-sosreport-plugins
+      - abiquo-ssm
+      - abiquo-ui
+      - abiquo-v2v
+      - abiquo-virtualfactory
+      - abiquo-vsm.noarch
+
+  - name: Apply abiquo.properties Template
+    template: src=abiquo.properties.j2 dest=/opt/abiquo/config/abiquo.properties
+
+  - name: Apply Tomcat server.xml Template
+    template: src=server.xml.j2 dest=/opt/abiquo/tomcat/conf/server.xml
+
+# Python mysql module required to run these tasks
+#
+#  - name: Create kinton database
+#    mysql_db: name=kinton state=present
+#
+#  - name: Import kinton database schema
+#    mysql_db: name=kinton state=import target=/usr/share/doc/abiquo-server/database/kinton-schema.sql
+  
+  - name: Create kinton database
+    shell: /usr/bin/mysql -e "create database kinton"
+
+  - name: Import kinton database schema
+    shell: /usr/bin/mysql kinton < /usr/share/doc/abiquo-server/database/kinton-schema.sql
+
+  - name: Configure client-config.json API endpoint
+    lineinfile: "dest=/var/www/html/ui/config/client-config.json state=present regexp='\"config.endpoint\"' line='    \"config.endpoint\": \"{{ http_protocol }}://{{ ansible_default_ipv4.address }}:{{ http_port }}/api\",'"
+
+  - name: Clean Apache default configuration
+    shell: rm -rf /etc/httpd/conf.d/*
+    ignore_errors: True
+
+  - name: Apply Apache abiquo.conf site Template
+    template: src=abiquo.conf.j2 dest=/etc/httpd/conf.d/abiquo.conf
+    notify: restart httpd
+
+# State started for abiquo-tomcat is not working. Need to be reviewed
+  - name: Start abiquo-tomcat Server at system startup
+    service: name=abiquo-tomcat state=started enabled=yes pattern=tomcat
+
+  - name: Start abiquo-tomcat Server
+    shell: service abiquo-tomcat start
+

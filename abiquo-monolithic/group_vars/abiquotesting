@@ -1,0 +1,6 @@
+# Here are variables related to the Abiquo 3.0 Monolithic installation
+tomcat_http_port: 8009
+tomcat_ajp_port: 8010
+tomcat_https_port: 8443
+http_port: 80
+http_protocol: http

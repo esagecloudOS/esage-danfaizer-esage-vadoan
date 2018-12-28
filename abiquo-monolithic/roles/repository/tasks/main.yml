@@ -1,0 +1,21 @@
+  - name: Clean yum.repos.d folder
+    shell: rm -rf /etc/yum.repos.d/*
+    ignore_errors: True
+
+  - name: Copy Abiquo-Base repo file
+    template: src=Abiquo-Base.repo dest=/etc/yum.repos.d/
+
+  - name: Yum clean
+    shell: yum clean all -y
+
+# Is this necessary ?
+#  - name: Install Centos6 Repo GPG-KEY
+#    shell: rpm --import http://mirror.abiquo.com/mirror.centos.org/centos-6/6/os/x86_64/RPM-GPG-KEY-CentOS-6
+
+# Is this necessary ?
+#  - name: Install Abiquo Repo GPG-KEY
+#    shell: rpm --import http://mirror.abiquo.com/RPM-GPG-KEY-Abiquo
+
+# This will install RPM-GPG-KEY-Abiquo
+  - name: Install Abiquo-release-ee package
+    yum: name=abiquo-release-ee disable_gpg_check=yes state=present
